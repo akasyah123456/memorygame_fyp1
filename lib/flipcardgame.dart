@@ -1,40 +1,35 @@
+import 'dart:async';
+
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'data.dart';
-import 'dart:async';
 
 class FlipCardGame extends StatefulWidget {
-  final Level level;
-  FlipCardGame(this.level);
+  final Level _level;
+  FlipCardGame(this._level);
   @override
-  _FlipCardGameState createState() => _FlipCardGameState(level);
+  _FlipCardGameState createState() => _FlipCardGameState(_level);
 }
 
 class _FlipCardGameState extends State<FlipCardGame> {
-  _FlipCardGameState(
-      {required this.level,
-      required this.timer,
-      required this.cardFlips,
-      required this.isFinished,
-      required this.left,
-      required this.data,
-      required this.cardStateKeys});
+  _FlipCardGameState(this._level);
 
-  int previousIndex = -1;
-  bool flip = false;
-  bool start = false;
+  int _previousIndex = -1;
+  bool _flip = false;
+  bool _start = false;
 
-  bool wait = false;
-  Level level;
-  Timer timer;
-  int time = 5;
-  int left;
-  bool isFinished;
-  List<String> data;
+  bool _wait = false;
+  Level _level;
+  late Timer _timer;
+  int _time = 5;
+  int? _left;
+  bool _isFinished = false;
+  List<String> _data = [];
 
-  List<bool> cardFlips;
-  List<GlobalKey<FlipCardState>> cardStateKeys;
+  List<bool> _cardFlips = [];
+  List<GlobalKey<FlipCardState>> _cardStateKeys = [];
 
   Widget getItem(int index) {
     return Container(
@@ -50,33 +45,33 @@ class _FlipCardGameState extends State<FlipCardGame> {
           ],
           borderRadius: BorderRadius.circular(5)),
       margin: EdgeInsets.all(4.0),
-      child: Image.asset(data[index]),
+      child: Image.asset(_data[index]),
     );
   }
 
   startTimer() {
-    timer = Timer.periodic(Duration(seconds: 1), (t) {
+    _timer = Timer.periodic(Duration(seconds: 1), (t) {
       setState(() {
-        time = time - 1;
+        _time = _time - 1;
       });
     });
   }
 
   void restart() {
     startTimer();
-    data = getSourceArray(
-      level,
+    _data = getSourceArray(
+      _level,
     );
-    cardFlips = getInitialItemState(level);
-    cardStateKeys = getCardStateKeys(level);
-    time = 5;
-    left = (data.length ~/ 2);
+    _cardFlips = getInitialitemState(_level);
+    _cardStateKeys = getCardStateKeys(_level);
+    _time = 5;
+    _left = (_data.length ~/ 2);
 
-    isFinished = false;
+    _isFinished = false;
     Future.delayed(const Duration(seconds: 6), () {
       setState(() {
-        start = true;
-        timer.cancel();
+        _start = true;
+        _timer.cancel();
       });
     });
   }
@@ -95,7 +90,7 @@ class _FlipCardGameState extends State<FlipCardGame> {
 
   @override
   Widget build(BuildContext context) {
-    return isFinished
+    return _isFinished
         ? Scaffold(
             body: Center(
               child: GestureDetector(
@@ -130,13 +125,13 @@ class _FlipCardGameState extends State<FlipCardGame> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: time > 0
+                      child: _time > 0
                           ? Text(
-                              '$time',
+                              '$_time',
                               style: Theme.of(context).textTheme.headline3,
                             )
                           : Text(
-                              'Left:$left',
+                              'Left:$_left',
                               style: Theme.of(context).textTheme.headline3,
                             ),
                     ),
@@ -148,55 +143,56 @@ class _FlipCardGameState extends State<FlipCardGame> {
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
                         ),
-                        itemBuilder: (context, index) => start
+                        itemBuilder: (context, index) => _start
                             ? FlipCard(
-                                key: cardStateKeys[index],
+                                key: _cardStateKeys[index],
                                 onFlip: () {
-                                  if (!flip) {
-                                    flip = true;
-                                    previousIndex = index;
+                                  if (!_flip) {
+                                    _flip = true;
+                                    _previousIndex = index;
                                   } else {
-                                    flip = false;
-                                    if (previousIndex != index) {
-                                      if (data[previousIndex] != data[index]) {
-                                        wait = true;
+                                    _flip = false;
+                                    if (_previousIndex != index) {
+                                      if (_data[_previousIndex] !=
+                                          _data[index]) {
+                                        _wait = true;
 
                                         Future.delayed(
                                             const Duration(milliseconds: 1500),
                                             () {
-                                          cardStateKeys[previousIndex]
-                                              .currentState
+                                          _cardStateKeys[_previousIndex]
+                                              .currentState!
                                               .toggleCard();
-                                          previousIndex = index;
-                                          cardStateKeys[previousIndex]
-                                              .currentState
+                                          _previousIndex = index;
+                                          _cardStateKeys[_previousIndex]
+                                              .currentState!
                                               .toggleCard();
 
                                           Future.delayed(
                                               const Duration(milliseconds: 160),
                                               () {
                                             setState(() {
-                                              wait = false;
+                                              _wait = false;
                                             });
                                           });
                                         });
                                       } else {
-                                        cardFlips[previousIndex] = false;
-                                        cardFlips[index] = false;
-                                        print(cardFlips);
+                                        _cardFlips[_previousIndex] = false;
+                                        _cardFlips[index] = false;
+                                        print(_cardFlips);
 
                                         setState(() {
-                                          left -= 1;
+                                          _left = _left! - 1;
                                         });
-                                        if (cardFlips
+                                        if (_cardFlips
                                             .every((t) => t == false)) {
                                           print("Won");
                                           Future.delayed(
                                               const Duration(milliseconds: 160),
                                               () {
                                             setState(() {
-                                              isFinished = true;
-                                              start = false;
+                                              _isFinished = true;
+                                              _start = false;
                                             });
                                           });
                                         }
@@ -205,7 +201,7 @@ class _FlipCardGameState extends State<FlipCardGame> {
                                   }
                                   setState(() {});
                                 },
-                                flipOnTouch: wait ? false : cardFlips[index],
+                                flipOnTouch: _wait ? false : _cardFlips[index],
                                 direction: FlipDirection.HORIZONTAL,
                                 front: Container(
                                   decoration: BoxDecoration(
@@ -229,7 +225,7 @@ class _FlipCardGameState extends State<FlipCardGame> {
                                 ),
                                 back: getItem(index))
                             : getItem(index),
-                        itemCount: data.length,
+                        itemCount: _data.length,
                       ),
                     ),
                   ],

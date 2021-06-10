@@ -1,7 +1,7 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/cupertino.dart';
 
-enum Level {Hard,Medium,Easy}
+enum Level { Hard, Medium, Easy }
 List<String> fillsourceArray() {
   return [
     'assets/arabicpics/1.png',
@@ -25,8 +25,7 @@ List<String> fillsourceArray() {
   ];
 }
 
-
-List getSourceArray(Level level) {
+List<String> getSourceArray(Level level) {
   // ignore: deprecated_member_use
   List<String> levelAndKindList = [];
   List sourceArray = fillsourceArray();
@@ -39,7 +38,7 @@ List getSourceArray(Level level) {
       levelAndKindList.add(sourceArray[i]);
     }
   } else if (level == Level.Easy) {
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 6; i++) {
       levelAndKindList.add(sourceArray[i]);
     }
   }
@@ -48,7 +47,7 @@ List getSourceArray(Level level) {
 }
 
 List<bool> getInitialitemState(Level level) {
-   List<bool> initialitemstate = [];
+  List<bool> initialitemstate = [];
   if (level == Level.Hard) {
     for (int i = 0; i < 18; i++) {
       initialitemstate.add(true);
@@ -66,7 +65,6 @@ List<bool> getInitialitemState(Level level) {
 }
 
 List<GlobalKey<FlipCardState>> getCardStateKeys(Level level) {
-  
   List<GlobalKey<FlipCardState>> cardStateKeys = [];
   if (level == Level.Hard) {
     for (int i = 0; i < 18; i++) {
